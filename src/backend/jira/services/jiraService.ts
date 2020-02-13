@@ -1,3 +1,5 @@
+import { Injectable } from '@nestjs/common';
+
 export interface IJiraCardData {
   id: string,
   title: string,
@@ -12,6 +14,7 @@ export interface IJiraService {
   update(item: IJiraCardData)
 }
 
+@Injectable()
 export class JiraServiceFake implements IJiraService{
   initialize(config: any) {
   }

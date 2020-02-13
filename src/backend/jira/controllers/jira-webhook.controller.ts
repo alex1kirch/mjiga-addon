@@ -22,9 +22,9 @@ export class JiraWebhookController {
 
     await this.miroRestSrv.updateCard(
       this.configSrv.miroAppInfo.accessToken,
-      updateInfo.boardId,
-      updateInfo.widgetId,
-      updateInfo.cardData,
+      "",
+      "updateInfo.widgetId",
+      null!,
     );
     console.log(payload);
 
