@@ -1,5 +1,5 @@
-import { Body, Controller, Get, HttpService, Post, Req } from '@nestjs/common';
-import { Request } from 'express';
+import { Body, Controller, Get, HttpService, Post, Req, Res } from '@nestjs/common';
+import { Response } from 'express';
 import {
   IJiraCardData,
   JiraServiceFake,
@@ -23,8 +23,13 @@ export class RestController {
     private readonly jiraService: JiraServiceFake,
   ) {}
 
+  @Get('test')
+  async test() : Promise<string> {
+    return "Ok";
+  }
+
   @Post('start')
-  async start(@Req() req: Request, @Body() config: any): Promise<void> {
+  async start(@Res() res: Response, @Body() config: any): Promise<void> {
     if (this.widgetIds.length > 0) {
       return;
     }
@@ -37,9 +42,13 @@ export class RestController {
 
     this.jiraService.initialize(config);
 
-    RestController.syncMiroToJira(this)
-    //setInterval(() => RestController.syncMiroToJira(this), 1000);
-    return Promise.resolve();
+    //RestController.syncMiroToJira(this)
+
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,HEAD');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Accept');
+    res.status(200).send();
+    setInterval(() => RestController.syncMiroToJira(this), 1000);
   }
 
   private static async syncMiroToJira(context: RestController) {
@@ -57,7 +66,7 @@ export class RestController {
     const cardWidgets = result.data.data.filter(x => x.type === 'card');
     const parsedMiroCardWidgets = cardWidgets
       .map(x => RestController.parseMiroCardWidget(x))
-      .filter(x => !!x.widgetIds);
+      .filter(x => x.widgetId);
 
     const differenceWidgets = RestController.getDifferences(
       context,
@@ -134,7 +143,10 @@ export class RestController {
     return jiraCard;
   }
 
-  private static parseMiroCardWidget(json: any): IWidgetData {
+  private static parseMiroCardWidget(json: any): IWidgetData | {widgetId: string} {
+    if (!json.kanbanNode){
+      return {widgetId: undefined}!
+    }
     const result: IWidgetData = {
       columnId: json.kanbanNode.column,
       description: json.description,
