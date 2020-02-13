@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpService, Post, Req } from '@nestjs/common';
 import { Request } from 'express';
 import {
   IJiraCardData,
-  JiraServiceFake,
+  JiraService,
 } from '../../jira/services/jiraService';
 
 interface IWidgetData {
@@ -20,7 +20,7 @@ export class RestController {
 
   constructor(
     private readonly httpService: HttpService,
-    private readonly jiraService: JiraServiceFake,
+    private readonly jiraService: JiraService,
   ) {}
 
   @Post('start')

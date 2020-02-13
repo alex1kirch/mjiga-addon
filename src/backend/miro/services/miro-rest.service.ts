@@ -19,6 +19,7 @@ export class MiroRestService {
     bodyObj?: object,
   ): Promise<Response> {
     const restUrl = new URL(pathOrUrl, this.apiUrl);
+    console.log(restUrl.href);
     const headers = {
       Authorization: `Bearer ${accessToken}`,
       Accept: 'application/json',
@@ -121,13 +122,8 @@ export class MiroRestService {
     accessToken: string,
     boardId: string,
     widgetId: string,
-    issueInfo: IssueInfo,
+    cardData: any,
   ): Promise<Response> {
-    const cardData = issueInfoToMiroCardData(
-      this.config.miroAppInfo.clientId,
-      issueInfo,
-    );
-    delete cardData.type;
     return this.fetchRestResponse(
       accessToken,
       'PATCH',

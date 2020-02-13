@@ -3,6 +3,7 @@ import { ConfigService } from '../../config/services/config.service';
 import { MiroRestService } from '../../miro/services/miro-rest.service';
 import fetch from 'node-fetch';
 import { Response } from 'express';
+import { JiraService } from '../services/jiraService';
 
 function getCardUpdateInfoForIssue(issueId, statusTo) {}
 
@@ -11,27 +12,28 @@ export class JiraWebhookController {
   constructor(
     private readonly miroRestSrv: MiroRestService,
     private readonly configSrv: ConfigService,
+    private readonly jiraSrv: JiraService
   ) {}
 
   @Post('webhook')
   async jiraBoardUpdated(@Body() payload: any) {
-    console.log(payload.webhookEvent)
+    console.log(payload.webhookEvent);
     if (payload.webhookEvent === 'jira:issue_updated') {
       const changelogItem = payload.changelog.items.find(item => item.field === 'status');
-      console.log(changelogItem)
+      console.log(changelogItem);
       if (changelogItem) {
-        const updateInfo = getCardUpdateInfoForIssue(
+        const updateInfo = this.jiraSrv.getCardUpdateInfoForIssue(
           payload.issue.id,
           changelogItem.to,
         );
-      }
 
-      // await this.miroRestSrv.updateCard(
-      //   this.configSrv.miroAppInfo.accessToken,
-      //   updateInfo.boardId,
-      //   updateInfo.widgetId,
-      //   updateInfo.cardData,
-      // );
+        await this.miroRestSrv.updateCard(
+          this.configSrv.miroAppInfo.accessToken,
+          updateInfo.boardId,
+          updateInfo.widgetId,
+          updateInfo.cardJson,
+        );
+      }
     }
 
     return '';

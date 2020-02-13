@@ -9,18 +9,37 @@ export interface IJiraCardData {
 }
 
 export interface IJiraService {
+  initialize(config: any);
 
-  initialize(config: any)
-
-  update(item: IJiraCardData)
+  update(item: IJiraCardData);
 }
 
 @Injectable()
-export class JiraServiceFake implements IJiraService{
+export class JiraService implements IJiraService {
+  private currentConfig: any;
   initialize(config: any) {
+    this.currentConfig = config;
   }
 
-  update(item: IJiraCardData) {
-  }
+  update(item: IJiraCardData) {}
 
+  getCardUpdateInfoForIssue(
+    issueId: string,
+    toStatus: string,
+  ): { boardId: string; widgetId: string; cardJson: any } {
+    const statusMap = this.currentConfig.metadata['3074457345621789607']
+      .statusIdToKanbanColumnIdMap[toStatus];
+    const newColumnId = statusMap.columnId;
+    const newSubColumnId = statusMap.subColumnId;
+    return {
+      boardId: 'o9J_k1IGnzo=',
+      widgetId: this.currentConfig.items.find(item => item.issueId === issueId).widgetId,
+      cardJson: {
+        kanbanNode: {
+          column: newColumnId,
+          subColumn: newSubColumnId
+        }
+      },
+    };
+  }
 }

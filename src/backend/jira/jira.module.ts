@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { JiraWebhookController } from './controllers/jira-webhook.controller';
 import { MiroModule } from '../miro/miro.module';
-import { JiraServiceFake } from './services/jiraService';
+import { JiraService } from './services/jiraService';
 
 @Module({
-  providers: [JiraServiceFake],
+  providers: [JiraService],
   controllers: [JiraWebhookController],
   imports: [MiroModule],
-  exports: [JiraServiceFake],
+  exports: [JiraService],
 })
 export class JiraModule {}

@@ -5,7 +5,7 @@
     "miro": {
       "baseUrl": "https://miro.com",
       "oauthUrl": "https://miro.com/oauth/authorize",
-      "apiUrl": "https://api.miro.com/v1/",
+      "apiUrl": "http://10.10.0.152:9114/api/v1/",
       "exchangeUrl": "https://api.miro.com/v1/oauth/token",
       "clientId": "myappclientid",
       "clientSecret": "myappsecret",
