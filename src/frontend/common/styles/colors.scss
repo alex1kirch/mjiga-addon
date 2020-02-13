@@ -1,0 +1,44 @@
+$color-black: #000;
+$color-white: #fff;
+$color-white-60: fade($color-white, 60);
+$color-primary: #4262ff;
+$color-primary-hover: #455bed;
+$color-primary-active: #3d51d4;
+$color-primary-80: #6881ff;
+$color-primary-40: lighten(adjust-hue($color-primary, 0.3712), 25.0980);
+$color-primary-24: #d2daff;
+$color-primary-12: #e8ecff;
+$color-primary-8: #f0f3ff;
+$color-primary-6: #f4f6ff;
+$color-primary-4: #f8f9ff;
+
+$color-secondary: #050038;
+$color-secondary-60: fade($color-secondary, 60);
+$color-secondary-50: #827f9b;
+$color-secondary-24: #c3c2cf;
+$color-secondary-12: #e1e0e7;
+$color-secondary-8: #ebebef;
+$color-secondary-6: #f0f0f3;
+$color-secondary-4: #f5f5f7;
+$color-secondary-2: fade($color-secondary, 2);
+$color-success: #7cc576;
+$color-danger: #d92929;
+$color-danger-hover: #c71414;
+$color-danger-active: #b80d0d;
+$color-danger-80: #e15454;
+$color-danger-6: #fdf2f2;
+$color-danger-4: #fef7f7;
+
+$rgba-color-secondary-80: fade($color-secondary, 80);
+$rgba-color-secondary-60: fade($color-secondary, 60);
+$rgba-color-secondary-50: fade($color-secondary, 50);
+$rgba-color-secondary-24: fade($color-secondary, 24);
+$rgba-color-secondary-12: fade($color-secondary, 12);
+$rgba-color-secondary-8: fade($color-secondary, 8);
+$rgba-color-primary-6: fade($color-primary, 6);
+$rgba-color-primary-4: fade($color-primary, 4);
+
+$color-base-modal-bg: #211F33;
+$color-modal-bg: fade($color-base-modal-bg, 88);
+
+$miro-settings-font-color: #333333;

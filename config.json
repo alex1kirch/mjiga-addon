@@ -1,0 +1,47 @@
+{
+  "development": {
+    "port": 3001,
+    "localBaseUrl": "",
+    "miro": {
+      "baseUrl": "https://miro.com",
+      "oauthUrl": "https://miro.com/oauth/authorize",
+      "apiUrl": "https://api.miro.com/v1/",
+      "exchangeUrl": "https://api.miro.com/v1/oauth/token",
+      "clientId": "myappclientid",
+      "clientSecret": "myappsecret",
+      "accessToken": "fordevpurposes"
+    },
+    "jira": {
+      "jiraAccessToken": "fordevpurposes"
+    },
+    "dbConnection": {
+      "type": "sqlite",
+      "database": "./mjiga-dev.db"
+    }
+  },
+  "jest": {
+    "port": 3001,
+    "localBaseUrl": "http://localhost:3001/",
+    "miro": {
+      "baseUrl": "https://miro-mock.com",
+      "oauthUrl": "https://miro-mock.com/oauth/authorize",
+      "apiUrl": "https://api.miro-mock.com/v1/",
+      "exchangeUrl": "https://miro-mock.com/v1/oauth/token",
+      "clientId": "1234567890",
+      "clientSecret": "mockmirosecret"
+    },
+    "azure": {
+      "oauthUrl": "https://azure-mock.com/oauth2/authorize",
+      "exchangeUrl": "https://azure-mock.com/oauth2/token",
+      "appId": "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
+      "scope": "vso.identity vso.project vso.serviceendpoint_manage vso.work_full",
+      "appSecret": "mockazureappsecret",
+      "clientSecret": "mockazureclientsecretjwt",
+      "redirectPath": "azure-callback"
+    },
+    "dbConnection": {
+      "type": "postgres",
+      "url": "$DATABASE_URL"
+    }
+  }
+}

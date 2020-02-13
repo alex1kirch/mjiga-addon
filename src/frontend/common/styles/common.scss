@@ -1,0 +1,17 @@
+@mixin blue-button {
+  margin-left: 10px;
+  float: right;
+  color: #ffffff;
+  border: solid 1px #4262ff;
+  border-radius: 4px;
+  background-color: #4262ff;
+  outline: none;
+  font-size: 14px;
+  transition: color 0.3s, background-color 0.3s, border-color 0.3s;
+  cursor: pointer;
+
+  &:hover {
+    border-color: #495dec;
+    background-color: #495dec;
+  }
+}

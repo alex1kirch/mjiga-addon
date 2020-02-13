@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "module": "es6",
+    "moduleResolution": "node",
+    "noUnusedLocals": true,
+    "strictNullChecks": true,
+    "jsx": "react",
+    "target": "es5",
+    "lib": ["es6", "dom"]
+  }
+}

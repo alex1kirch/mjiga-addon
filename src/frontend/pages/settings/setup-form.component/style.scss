@@ -1,0 +1,222 @@
+@import "../../../common/styles/colors";
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@mixin placeholder($color) {
+  &::-webkit-input-placeholder {
+    color: $color;
+  }
+  &::-moz-placeholder {
+    color: $color;
+  }
+  &:-moz-placeholder {
+    color: $color;
+  }
+  &:-ms-input-placeholder {
+    color: $color;
+  }
+  &::-ms-input-placeholder {
+    color: $color;
+  }
+  &::placeholder {
+    color: $color;
+    opacity: 1; /* Firefox */
+  }
+}
+
+.settings-form {
+  color: $miro-settings-font-color;
+}
+
+.settings-form__caption {
+  margin-bottom: 24px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.settings-form__field {
+  width: 100%;
+  margin: 0 0 15px 0;
+}
+
+.settings-form__error {
+  position: inherit;
+}
+
+.field {
+  position: inherit;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.field__control {
+  position: inherit;
+  min-height: 55px;
+  flex-grow: 2;
+}
+
+.field__btn {
+  margin-left: 54px;
+  min-width: 80px;
+}
+
+.btn {
+  -webkit-appearance: none;
+  outline: none;
+  display: inline-block;
+  border: 1px solid;
+  border-radius: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
+  line-height: 1;
+  cursor: pointer;
+  vertical-align: middle;
+  padding: 9px 16px 11px;
+  font-size: 14px;
+  height: 36px;
+
+  &[disabled] {
+    pointer-events: none;
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+.btn_primary {
+  color: $color-white;
+  border-color: $color-primary;
+  background-color: $color-primary;
+
+  &.btn_loading {
+    border-color: $color-primary-active;
+    background-color: $color-primary-active;
+    &::before {
+      border-color: transparent $color-white $color-white $color-white;
+    }
+  }
+
+  &:hover {
+    border-color: $color-primary-hover;
+    background-color: $color-primary-hover;
+  }
+
+  &:active {
+    border-color: $color-primary-active;
+    background-color: $color-primary-active;
+  }
+}
+
+.btn_secondary {
+  color: $color-secondary;
+  border-color: $color-secondary-24;
+  background-color: transparent;
+
+  &.btn_loading {
+    background-color: $color-secondary-4;
+    &::before {
+      border-color: transparent $color-secondary $color-secondary $color-secondary;
+    }
+  }
+
+  &:hover {
+    border-color: #f0f0f3;
+    background-color: #f0f0f3;
+  }
+
+  &:active {
+    background-color: $color-secondary-4;
+  }
+}
+
+.btn_loading {
+  position: relative;
+  color: transparent;
+  opacity: 1;
+  cursor: default;
+  pointer-events: none;
+  &::before {
+    content: '';
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    border-radius: 100%;
+    border: 2px solid;
+    width: 16px;
+    height: 16px;
+    animation: spinner 0.6s linear infinite;
+  }
+}
+
+.input {
+  -webkit-appearance: none;
+  outline: none;
+  color: $color-secondary;
+  background-color: transparent;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(5, 0, 56, 0.24);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  background-origin: border-box;
+  background-repeat: no-repeat;
+  background-size: 0 1px;
+  background-position: 0 100%;
+  background-image: linear-gradient(90deg, rgba(5, 0, 56, 0.5), rgba(5, 0, 56, 0.5));
+  transition: border-color 0.4s ease-in-out, background-size 0.4s ease-in-out;
+  padding: 2px 0 4px;
+  font-size: 14px;
+  height: 36px;
+
+  @include placeholder($color-secondary-50);
+
+  &[readonly] {
+    border: none;
+    @include placeholder($color-secondary);
+  }
+
+  &[disabled] {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  &:not([readonly]):hover, &:not([readonly]):focus {
+    background-size: 100% 1px;
+  }
+
+  &:not([disabled]):not([readonly]):hover {
+    border-color: rgba(5, 0, 56, 0.24);
+  }
+
+  &:not([disabled]):not([readonly]):focus {
+    border-color: $color-primary-80;
+  }
+}
+
+.labeled-input {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 340px;
+}
+
+.labeled-input__input {
+  max-width: 340px;
+}
+
+.labeled-input__label {
+  color: $color-secondary;
+  display: block;
+}
