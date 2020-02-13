@@ -33,7 +33,7 @@ export class JiraService implements IJiraService {
     const newSubColumnId = statusMap.subColumnId;
     return {
       boardId: 'o9J_k1IGnzo=',
-      widgetId: this.currentConfig.items.find(item => item.issueId === issueId).widgetId,
+      widgetId: this.currentConfig.items.find(item => item.jiraIssueId === issueId).widgetId,
       cardJson: {
         kanbanNode: {
           column: newColumnId,

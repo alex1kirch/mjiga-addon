@@ -5,8 +5,6 @@ import fetch from 'node-fetch';
 import { Response } from 'express';
 import { JiraService } from '../services/jiraService';
 
-function getCardUpdateInfoForIssue(issueId, statusTo) {}
-
 @Controller('jira')
 export class JiraWebhookController {
   constructor(
