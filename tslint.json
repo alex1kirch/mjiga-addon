@@ -6,7 +6,6 @@
   },
   "rulesDirectory": ["tslint-plugin-prettier"],
   "rules": {
-    "prettier": true,
     "no-console": false,
     "member-access": [false],
     "ordered-imports": [false],
