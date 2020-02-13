@@ -520,6 +520,9 @@ export interface ICardWidgetData extends IBaseWidget {
       iconUrl: string;
     };
   };
+  parentId?: string;
+  columnId?: string;
+  subcolumnId?: string;
   style: {
     backgroundColor: BackgroundColorStyle;
   };

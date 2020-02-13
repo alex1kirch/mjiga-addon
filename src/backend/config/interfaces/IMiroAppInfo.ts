@@ -5,4 +5,5 @@ export default interface IMiroAppInfo {
   clientSecret: string;
   apiUrl: string;
   baseUrl: string;
+  accessToken: string;
 }

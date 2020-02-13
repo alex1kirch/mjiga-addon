@@ -1,7 +1,7 @@
 {
   "development": {
     "port": 3001,
-    "localBaseUrl": "",
+    "localBaseUrl": "http://localhost",
     "miro": {
       "baseUrl": "https://miro.com",
       "oauthUrl": "https://miro.com/oauth/authorize",

@@ -1,5 +1,6 @@
 {
   "extends": "../../tsconfig",
+  "baseUrl": "../../.",
   "compilerOptions": {
     "module": "commonjs",
     "moduleResolution": "node",
@@ -8,8 +9,6 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
-    "noUnusedLocals": true,
-    "strictNullChecks": true,
     "target": "es6"
   }
 }
