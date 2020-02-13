@@ -4,18 +4,13 @@ import {
   IJiraCardData,
   JiraServiceFake,
 } from '../../jira/services/jiraService';
-import { preprocessDirectives } from 'tslint/lib/verify/parse';
 
 interface IWidgetData {
   widgetId: string;
-  jiraIssueId: string;
+  columnId: string;
+  subColumnId: string;
   summary: string;
   description: string;
-  status: string;
-  priority: string;
-  assignee: string;
-  color: string;
-  tags: string[];
 }
 
 @Controller('api/v1')
@@ -42,22 +37,24 @@ export class RestController {
 
     this.jiraService.initialize(config);
 
-    setInterval(() => RestController.syncMiroToJira(this), 1000);
+    RestController.syncMiroToJira(this)
+    //setInterval(() => RestController.syncMiroToJira(this), 1000);
     return Promise.resolve();
   }
 
   private static async syncMiroToJira(context: RestController) {
-    const boardId: string = 'o9J_kv2v8Bs=';
+    const boardId: string = 'o9J_k1IGnzo=';
+    const token: string = 'f672f733-b74c-4d77-9124-9ce187cd5480';
     const headers = {
-      authorization: 'Bearer dd0976bb-24b8-45e0-b735-357354a5927e',
+      authorization: 'Bearer ' + token,
     };
     const observer = await context.httpService.get(
-      'https://api.miro.com/v1/boards/' + boardId + '/widgets/',
+      'http://10.10.0.152:9114/v1/boards/' + boardId + '/widgets/',
       { headers: headers },
     );
     const result = await observer.toPromise();
 
-    const cardWidgets = result.data.filter(x => x.type === 'card');
+    const cardWidgets = result.data.data.filter(x => x.type === 'card');
     const parsedMiroCardWidgets = cardWidgets
       .map(x => RestController.parseMiroCardWidget(x))
       .filter(x => !!x.widgetIds);
@@ -74,15 +71,16 @@ export class RestController {
   private async processDifferences(
     differWidgets: IWidgetData[],
   ): Promise<void> {
-    const jiraCards = differWidgets.map(x => RestController.widgetDataToJiraCardData(x))
+    const jiraCards = differWidgets.map(x =>
+      RestController.widgetDataToJiraCardData(x),
+    );
     jiraCards.forEach(x => {
       try {
-        this.jiraService.update(x)
+        this.jiraService.update(x);
+      } catch (e) {
+        console.log(e);
       }
-      catch (e) {
-        console.log(e)
-      }
-    })
+    });
   }
 
   private static getDifferences(
@@ -90,33 +88,35 @@ export class RestController {
     widgetsOnMiroBoard: IWidgetData[],
     oldWidgets: IWidgetData[],
   ): IWidgetData[] {
-    const differWidgets : IWidgetData[] = [];
-    widgetsOnMiroBoard.forEach((newItem) => {
-      const oldIndex = oldWidgets.findIndex(x => x.widgetId === newItem.widgetId)
+    const differWidgets: IWidgetData[] = [];
+    widgetsOnMiroBoard.forEach(newItem => {
+      const oldIndex = oldWidgets.findIndex(
+        x => x.widgetId === newItem.widgetId,
+      );
       if (oldIndex < 0) {
         return;
       }
 
       const oldItem = oldWidgets[oldIndex];
-      const difference = RestController.compare(oldItem, newItem)
-      differWidgets.push(difference)
-    })
+      const difference = RestController.compare(oldItem, newItem);
+      differWidgets.push(difference);
+    });
 
-    return differWidgets
+    return differWidgets;
   }
 
-  private static compare(source: IWidgetData, target: IWidgetData) : IWidgetData | null {
-    if (source.status !== target.status ||
-    source.description !== target.description ||
-    source.assignee !== target.assignee ||
-    source.color !== target.color ||
-    source.priority !== target.priority ||
-    source.summary !== target.summary ||
-    source.tags !== target.tags) {
-
+  private static compare(
+    source: IWidgetData,
+    target: IWidgetData,
+  ): IWidgetData | null {
+    if (
+      source.description !== target.description ||
+      source.summary !== target.summary ||
+      source.columnId !== target.columnId ||
+      source.subColumnId !== target.subColumnId
+    ) {
       return target;
-    }
-    else {
+    } else {
       return null;
     }
   }
@@ -125,25 +125,22 @@ export class RestController {
     widgetData: IWidgetData,
   ): IJiraCardData {
     const jiraCard: IJiraCardData = {
+      columnId: widgetData.columnId,
+      subColumnId: widgetData.subColumnId,
+      summary: widgetData.summary,
+      widgetId: widgetData.summary,
       description: widgetData.description,
-      id: widgetData.jiraIssueId,
-      status: widgetData.status,
-      title: widgetData.summary,
     };
     return jiraCard;
   }
 
   private static parseMiroCardWidget(json: any): IWidgetData {
     const result: IWidgetData = {
-      assignee: '',
-      color: '',
-      description: '',
-      priority: '',
-      status: '',
-      summary: '',
-      tags: [],
+      columnId: json.kanbanNode.column,
+      description: json.description,
+      subColumnId: json.kanbanNode.subColumn,
+      summary: json.title,
       widgetId: json.id,
-      jiraIssueId: undefined,
     };
     return result;
   }
@@ -152,15 +149,11 @@ export class RestController {
     var items = json['items'];
     return items.map(x => {
       const data: IWidgetData = {
-        assignee: x.assigne,
-        color: x.color,
         description: x.description,
-        jiraIssueId: x.jiraIssueId,
-        priority: x.priority,
-        status: x.status,
         summary: x.summary,
-        tags: [],
         widgetId: x.widgetId,
+        columnId: x.columnId,
+        subColumnId: x.subColumnId,
       };
       return data;
     });
