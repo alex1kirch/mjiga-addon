@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { KanbanService } from '../../database/services/kanban.service';
+import { Kanban } from '../../database/entities/kanban.entity';
 
 export interface IJiraCardData {
   widgetId: string;
@@ -16,17 +18,24 @@ export interface IJiraService {
 
 @Injectable()
 export class JiraService implements IJiraService {
+  constructor(private readonly kanbanSrv: KanbanService) {}
+
   private currentConfig: any;
   initialize(config: any) {
     this.currentConfig = config;
+    this.kanbanSrv.push(config)
   }
 
   update(item: IJiraCardData) {}
 
-  getCardUpdateInfoForIssue(
+  async getCardUpdateInfoForIssue(
     issueId: string,
     toStatus: string,
-  ): { boardId: string; widgetId: string; cardJson: any } {
+  ):Promise<{ boardId: string; widgetId: string; cardJson: any }[]> {
+    const kanbans = await this.kanbanSrv.getAll() as Kanban[];
+    kanbans.forEach((kb) => {
+      const kbJson = JSON.parse(kb.json)
+    });
     const statusMap = this.currentConfig.metadata['3074457345621789607']
       .statusIdToKanbanColumnIdMap[toStatus];
     const newColumnId = statusMap.columnId;

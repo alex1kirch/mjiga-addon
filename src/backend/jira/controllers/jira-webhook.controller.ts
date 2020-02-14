@@ -14,7 +14,8 @@ export class JiraWebhookController {
   ) {}
 
   @Post('webhook')
-  async jiraBoardUpdated(@Body() payload: any) {
+  async jiraBoardUpdated(@Body() payload: any, @Res() res: Response) {
+    res.status(200).send();
     console.log(payload.webhookEvent);
     if (payload.webhookEvent === 'jira:issue_updated') {
       const changelogItem = payload.changelog.items.find(item => item.field === 'status');
@@ -33,8 +34,6 @@ export class JiraWebhookController {
         );
       }
     }
-
-    return '';
   }
 
   @Get('image')
