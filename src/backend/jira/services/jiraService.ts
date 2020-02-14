@@ -57,39 +57,71 @@ export class JiraService implements IJiraService {
     });
     if (kanbanCard) {
 
-      const updateUrl = new URL(
+      const transitionUrl = new URL(
         `issue/${kanbanCard.jiraIssueId}/transitions?expand=transitions.fields`,
         this.configSrv.jiraInfo.jiraApiUrl,
       );
 
+      const updateUrl = new URL(`issue/${kanbanCard.jiraIssueId}/`, this.configSrv.jiraInfo.jiraApiUrl);
+
+      console.log(transitionUrl.href);
       console.log(updateUrl.href);
-      let jiraNewStatus = '';
+      let jiraTransition = '';
       for (let status in kanban.metadata["3074457345621789607"].statusIdToKanbanColumnIdMap) {
         const hz = kanban.metadata["3074457345621789607"].statusIdToKanbanColumnIdMap[status];
         if (hz.columnId == card.columnId) {
-          jiraNewStatus = status;
+          jiraTransition = hz.transitionId;
           break;
         }
       }
 
-      const data = {
-        update: {
-          Summary: [{set: card.summary}],
-          Description: [{set: card.description}],
-        },
+      const transitionData = {
         transition: {
-          id: jiraNewStatus
+          id: jiraTransition
         }
-      }
+      };
+      const updateData = {
+        update: {
+            summary: [{set: card.summary}],
+            description: [{set: {
+                "type": "doc",
+                "version": 1,
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "text": card.description,
+                        "type": "text"
+                      }
+                    ]
+                  }
+                ]
+              }}],
+          }
+      };
+
       //@ts-ignore
       this.oauth._performSecureRequest(
         this.configSrv.jiraInfo.accessToken,
         this.configSrv.jiraInfo.accessTokenSecret,
         'POST',
+        transitionUrl.href,
+        null,
+        JSON.stringify(transitionData),
+        'application/json',
+        (error, data) => {
+          console.log(error, data)
+        }
+      );
+      //@ts-ignore
+      this.oauth._performSecureRequest(
+        this.configSrv.jiraInfo.accessToken,
+        this.configSrv.jiraInfo.accessTokenSecret,
+        'PUT',
         updateUrl.href,
         null,
-        JSON.stringify(data)
-        ,
+        JSON.stringify(updateData),
         'application/json',
         (error, data) => {
           console.log(error, data)

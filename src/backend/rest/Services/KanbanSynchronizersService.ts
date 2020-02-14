@@ -3,7 +3,7 @@ import { IJiraCardData, JiraService } from '../../jira/services/jiraService';
 
 const TOKEN = 'f672f733-b74c-4d77-9124-9ce187cd5480';
 const MiroServerHost = 'http://10.10.0.181:9114';
-const SyncPeriod = 3000;
+const SyncPeriod = 500;
 
 @Injectable()
 export class KanbanSynchronizersService {

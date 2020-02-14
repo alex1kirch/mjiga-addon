@@ -5,15 +5,15 @@
     "miro": {
       "baseUrl": "https://miro.com",
       "oauthUrl": "https://miro.com/oauth/authorize",
-      "apiUrl": "http://10.10.0.152:9114/v1/",
+      "apiUrl": "http://10.10.0.181:9114/v1/",
       "exchangeUrl": "https://api.miro.com/v1/oauth/token",
       "clientId": "myappclientid",
       "clientSecret": "myappsecret",
       "accessToken": "f672f733-b74c-4d77-9124-9ce187cd5480"
     },
     "jira": {
-      "accessToken": "kaqBaPrb2SJR6vih52yO4ngCP5mpDd4H",
-      "accessTokenSecret": "RxoE1Pievy0xzJrSw6USEbREEDdUV6eo",
+      "accessToken": "etvhhyVPRRDUEXlty52Jm4JUt3lfpsh2",
+      "accessTokenSecret": "DsAtISDAE63uCFuLnHFD2Yk5i9w9Z1dD",
       "consumerKey": "miro-platform-plugin-tasks",
       "consumerSecret": "-----BEGIN PRIVATE KEY-----\nMIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V\nA7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d\n7rjVJ0BLB+ubPK8iA/Tw3hLQgXMRRGRXXCn8ikfuQfjUS1uZSatdLB81mydBETlJ\nhI6GH4twrbDJCR2Bwy/XWXgqgGRzAgMBAAECgYBYWVtleUzavkbrPjy0T5FMou8H\nX9u2AC2ry8vD/l7cqedtwMPp9k7TubgNFo+NGvKsl2ynyprOZR1xjQ7WgrgVB+mm\nuScOM/5HVceFuGRDhYTCObE+y1kxRloNYXnx3ei1zbeYLPCHdhxRYW7T0qcynNmw\nrn05/KO2RLjgQNalsQJBANeA3Q4Nugqy4QBUCEC09SqylT2K9FrrItqL2QKc9v0Z\nzO2uwllCbg0dwpVuYPYXYvikNHHg+aCWF+VXsb9rpPsCQQDWR9TT4ORdzoj+Nccn\nqkMsDmzt0EfNaAOwHOmVJ2RVBspPcxt5iN4HI7HNeG6U5YsFBb+/GZbgfBT3kpNG\nWPTpAkBI+gFhjfJvRw38n3g/+UeAkwMI2TJQS4n8+hid0uus3/zOjDySH3XHCUno\ncn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+\n3jPgDUno6WbJn5cqm8MqWhW1xGkImgRk+fkDBquiq4gPiT898jusgQJAd5Zrr6Q8\nAO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54\nLw03eHTNQghS0A==\n-----END PRIVATE KEY-----\n\n",
       "jiraApiUrl": "https://miro-platform-plugin-tasks.atlassian.net/rest/api/3/",
