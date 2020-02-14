@@ -1,9 +1,18 @@
-import { Body, Controller, Get, HttpService, Post, Req, Res } from '@nestjs/common';
-import { Response } from 'express';
 import {
-  IJiraCardData,
-  JiraService,
-} from '../../jira/services/jiraService';
+  Body,
+  Controller,
+  Get,
+  HttpService,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
+import { Response } from 'express';
+import { IJiraCardData, JiraService } from '../../jira/services/jiraService';
+
+const DefaultMiroBoardID = 'o9J_k1IGnzo=';
+const TOKEN = 'f672f733-b74c-4d77-9124-9ce187cd5480';
+const MiroServerHost = "http://10.10.0.181:9114"
 
 interface IWidgetData {
   widgetId: string;
@@ -13,10 +22,14 @@ interface IWidgetData {
   description: string;
 }
 
+interface SynchronizerConfig {
+  miroBoardId: string;
+  initialWidgets: IWidgetData[];
+}
+
 @Controller('api/v1')
 export class RestController {
-  private readonly widgetIds: string[] = [];
-  private readonly currentWidgets: IWidgetData[] = [];
+  private synchronizers: KanbanSynchronizer[] = [];
 
   constructor(
     private readonly httpService: HttpService,
@@ -24,73 +37,140 @@ export class RestController {
   ) {}
 
   @Get('test')
-  async test() : Promise<string> {
-    return "Ok";
+  async test(): Promise<string> {
+    return 'Ok';
   }
 
   @Post('start')
   async start(@Res() res: Response, @Body() config: any): Promise<void> {
-    if (this.widgetIds.length > 0) {
+    const boardId = RestController.parseBoardId(config);
+    const inputWidgets = RestController.parseWidgetsData(config);
+    const syncConfig: SynchronizerConfig = {
+      initialWidgets: inputWidgets,
+      miroBoardId: boardId,
+    };
+
+    const newSynchronizer = new KanbanSynchronizer(syncConfig, this.httpService, this.jiraService)
+    newSynchronizer.start(config, null!)
+    this.synchronizers.push(newSynchronizer)
+
+    // res.header('Access-Control-Allow-Origin', '*');
+    // res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,HEAD');
+    // res.header('Access-Control-Allow-Headers', 'Content-Type, Accept');
+    res.status(200).send();
+  }
+
+  private static parseWidgetsData(json: any): IWidgetData[] {
+    var items = json['items'];
+    return items.map(x => {
+      const data: IWidgetData = {
+        description: RestController.format(x.description),
+        summary: RestController.format(x.summary),
+        widgetId: RestController.format(x.widgetId),
+        columnId: RestController.format(x.columnId),
+        subColumnId: RestController.format(x.subColumnId),
+      };
+      return data;
+    });
+  }
+
+  private static parseBoardId(json: any): string {
+    if (json.boardId) {
+      return json.boardId;
+    } else {
+      return DefaultMiroBoardID;
+    }
+  }
+
+  private static format(value: string): string {
+    return value ? value : '';
+  }
+}
+
+class KanbanSynchronizer {
+  private readonly miroBoardId: string;
+  private readonly currentWidgets: IWidgetData[];
+  private readonly widgetIds: string[]
+
+  private syncHandler: NodeJS.Timeout;
+  private started: boolean = false;
+  private onDestroyedFunc: (sender: KanbanSynchronizer) => void;
+
+  constructor(
+    config: SynchronizerConfig,
+    private readonly httpService: HttpService,
+    private readonly jiraService: JiraService,
+  ) {
+    this.miroBoardId = config.miroBoardId;
+    this.currentWidgets = config.initialWidgets;
+    this.widgetIds = config.initialWidgets.map(x => x.widgetId)
+  }
+
+  public start(config: any, onDestroyed: (sender: KanbanSynchronizer) => void): void {
+    if (this.started) {
       return;
     }
 
-    const inputWidgets = RestController.parseWidgetsData(config);
-    inputWidgets.forEach(x => {
-      this.widgetIds.push(x.widgetId);
-      this.currentWidgets.push(x);
-    });
-
+    this.started = true;
+    this.onDestroyedFunc = onDestroyed;
     this.jiraService.initialize(config);
-
-    RestController.syncMiroToJira(this)
-
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,HEAD');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Accept');
-    res.status(200).send();
-
-    setInterval(() => RestController.syncMiroToJira(this), 1000);
+    this.syncHandler = setInterval(() => KanbanSynchronizer.syncMiroToJira(this), 1000);
   }
 
-  private static async syncMiroToJira(context: RestController) {
+  public destroy(): void {
+    clearInterval(this.syncHandler)
+    if (this.onDestroyedFunc) {
+      this.onDestroyedFunc(this)
+    }
+  }
+
+  private static async syncMiroToJira(context: KanbanSynchronizer) {
     try {
-      const boardId: string = 'o9J_k1IGnzo=';
-      const token: string = 'f672f733-b74c-4d77-9124-9ce187cd5480';
+      const boardId: string = context.miroBoardId;
       const headers = {
-        authorization: 'Bearer ' + token,
+        authorization: 'Bearer ' + TOKEN,
       };
       const observer = await context.httpService.get(
-        'http://10.10.0.181:9114/v1/boards/' + boardId + '/widgets/',
+        MiroServerHost + '/v1/boards/' + boardId + '/widgets/',
         { headers: headers },
       );
       const result = await observer.toPromise();
 
       const cardWidgets = result.data.data.filter(x => x.type === 'card');
       const parsedMiroCardWidgets = cardWidgets
-        .map(x => RestController.parseMiroCardWidget(x))
+        .map(x => KanbanSynchronizer.parseMiroCardWidget(x))
         .filter(x => x.widgetId);
 
-      const differenceWidgets = RestController.getDifferences(
-        context,
-        parsedMiroCardWidgets,
-        context.currentWidgets,
-      );
+      const onlyOwnedCards = parsedMiroCardWidgets.filter(x => context.widgetIds.includes(x.widgetId))
+      if (onlyOwnedCards.length > 0){
+        // CHECK DIFF
 
-      await context.processDifferences(differenceWidgets);
+        const differenceWidgets = KanbanSynchronizer.getDifferences(
+          context,
+          onlyOwnedCards,
+          context.currentWidgets,
+        );
 
-      differenceWidgets.forEach(diff => {
-        const index = context.currentWidgets.findIndex(x => x.widgetId === diff.widgetId);
-        if (index >= 0){
-          const item = context.currentWidgets[index];
-          item.subColumnId = diff.subColumnId
-          item.columnId = diff.columnId;
-          item.summary = diff.summary;
-          item.description = diff.description;
-        }
-      })
-    }
-    catch (e) {
-      console.log(e)
+        await context.processDifferences(differenceWidgets);
+
+        differenceWidgets.forEach(diff => {
+          const index = context.currentWidgets.findIndex(
+            x => x.widgetId === diff.widgetId,
+          );
+          if (index >= 0) {
+            const item = context.currentWidgets[index];
+            item.subColumnId = diff.subColumnId;
+            item.columnId = diff.columnId;
+            item.summary = diff.summary;
+            item.description = diff.description;
+          }
+        });
+      }
+      else {
+        context.destroy();
+      }
+    } catch (e) {
+      console.log(e);
     }
   }
 
@@ -98,7 +178,7 @@ export class RestController {
     differWidgets: IWidgetData[],
   ): Promise<void> {
     const jiraCards = differWidgets.map(x =>
-      RestController.widgetDataToJiraCardData(x),
+      KanbanSynchronizer.widgetDataToJiraCardData(x),
     );
     jiraCards.forEach(x => {
       try {
@@ -110,7 +190,7 @@ export class RestController {
   }
 
   private static getDifferences(
-    context: RestController,
+    context: KanbanSynchronizer,
     widgetsOnMiroBoard: IWidgetData[],
     oldWidgets: IWidgetData[],
   ): IWidgetData[] {
@@ -124,7 +204,7 @@ export class RestController {
       }
 
       const oldItem = oldWidgets[oldIndex];
-      const difference = RestController.compare(oldItem, newItem);
+      const difference = KanbanSynchronizer.compare(oldItem, newItem);
       if (difference) {
         differWidgets.push(difference);
       }
@@ -162,35 +242,23 @@ export class RestController {
     return jiraCard;
   }
 
-  private static parseMiroCardWidget(json: any): IWidgetData | {widgetId: string} {
-    if (!json.kanbanNode){
-      return {widgetId: undefined}!
+  private static parseMiroCardWidget(
+    json: any,
+  ): IWidgetData | { widgetId: string } {
+    if (!json.kanbanNode) {
+      return { widgetId: undefined }!;
     }
     const result: IWidgetData = {
-      columnId: RestController.format(json.kanbanNode.column),
-      description: RestController.format(json.description),
-      subColumnId: RestController.format(json.kanbanNode.subColumn),
-      summary: RestController.format(json.title),
-      widgetId: RestController.format(json.id),
+      columnId: KanbanSynchronizer.format(json.kanbanNode.column),
+      description: KanbanSynchronizer.format(json.description),
+      subColumnId: KanbanSynchronizer.format(json.kanbanNode.subColumn),
+      summary: KanbanSynchronizer.format(json.title),
+      widgetId: KanbanSynchronizer.format(json.id),
     };
     return result;
   }
 
-  private static parseWidgetsData(json: any): IWidgetData[] {
-    var items = json['items'];
-    return items.map(x => {
-      const data: IWidgetData = {
-        description: RestController.format(x.description),
-        summary: RestController.format(x.summary),
-        widgetId: RestController.format(x.widgetId),
-        columnId: RestController.format(x.columnId),
-        subColumnId: RestController.format(x.subColumnId),
-      };
-      return data;
-    });
-  }
-
-  private static format(value: string) : string {
-    return value ? value : ""
+  private static format(value: string): string {
+    return value ? value : '';
   }
 }
