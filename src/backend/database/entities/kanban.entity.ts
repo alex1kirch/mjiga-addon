@@ -2,7 +2,7 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('kanban')
 export class Kanban {
-  @PrimaryColumn({type: 'numeric', generated: 'increment'})
+  @PrimaryColumn()
   id: number;
 
   @Column({type: 'varchar'})
