@@ -15,6 +15,7 @@ export class KanbanSynchronizersService {
 
   public addKanbanBoard(config: SynchronizerConfig){
     const newSynchronizer = new KanbanSynchronizer(
+      config.jiraBoardId,
       config,
       this.httpService,
       this.jiraService,
@@ -28,12 +29,20 @@ export class KanbanSynchronizersService {
     this.synchronizers.push(newSynchronizer);
   }
 
-  public onJiraAddCard(card: IJiraCardData){
-    //TODO
+  public onJiraAddCard(syncId: string, card: IJiraCardData){
+    const targetIndex = this.synchronizers.findIndex(x => x.syncId === syncId)
+    if (targetIndex >= 0){
+      const syncronizer = this.synchronizers[targetIndex];
+      syncronizer.addWidget(card);
+    }
   }
 
-  public onJiraRemoveCard(card: IJiraCardData) {
-    //TODO
+  public onJiraRemoveCard(syncId: string, widgetId: string) {
+    const targetIndex = this.synchronizers.findIndex(x => x.syncId === syncId)
+    if (targetIndex >= 0){
+      const syncronizer = this.synchronizers[targetIndex];
+      syncronizer.removeWidget(widgetId);
+    }
   }
 
 }
@@ -48,6 +57,7 @@ export interface IWidgetData {
 
 export interface SynchronizerConfig {
   miroBoardId: string;
+  jiraBoardId: string;
   initialWidgets: IWidgetData[];
 }
 
@@ -62,6 +72,7 @@ class KanbanSynchronizer {
   private onDestroyedFunc: (sender: KanbanSynchronizer) => void;
 
   constructor(
+    public readonly syncId: string,
     config: SynchronizerConfig,
     private readonly httpService: HttpService,
     private readonly jiraService: JiraService,
