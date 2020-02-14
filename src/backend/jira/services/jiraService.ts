@@ -42,7 +42,7 @@ export class JiraService implements IJiraService {
   private currentConfig: any;
   initialize(config: any) {
     this.currentConfig = config;
-    this.kanbanSrv.push(config);
+    //this.kanbanSrv.push(config);
   }
 
   update(card: IJiraCardData) {
