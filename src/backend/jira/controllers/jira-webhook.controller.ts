@@ -10,7 +10,7 @@ export class JiraWebhookController {
   constructor(
     private readonly miroRestSrv: MiroRestService,
     private readonly configSrv: ConfigService,
-    private readonly jiraSrv: JiraService
+    private readonly jiraSrv: JiraService,
   ) {}
 
   @Post('webhook')
@@ -18,7 +18,9 @@ export class JiraWebhookController {
     res.status(200).send();
     console.log(payload.webhookEvent);
     if (payload.webhookEvent === 'jira:issue_updated') {
-      const changelogItem = payload.changelog.items.find(item => item.field === 'status');
+      const changelogItem = payload.changelog.items.find(
+        item => item.field === 'status',
+      );
       console.log(changelogItem);
       if (changelogItem) {
         const updateInfo = this.jiraSrv.getCardUpdateInfoForIssue(
@@ -26,11 +28,13 @@ export class JiraWebhookController {
           changelogItem.to,
         );
 
-        await this.miroRestSrv.updateCard(
-          this.configSrv.miroAppInfo.accessToken,
-          updateInfo.boardId,
-          updateInfo.widgetId,
-          updateInfo.cardJson,
+        updateInfo.forEach(info =>
+          this.miroRestSrv.updateCard(
+            this.configSrv.miroAppInfo.accessToken,
+            info.boardId,
+            info.widgetId,
+            info.cardJson,
+          ),
         );
       }
     }
@@ -38,7 +42,7 @@ export class JiraWebhookController {
 
   @Get('image')
   async image(@Query('url') url: string, @Res() res: Response) {
-    console.log(url)
+    console.log(url);
     const imgRes = await fetch(url);
     console.log(imgRes.statusText);
     if (imgRes.ok) {

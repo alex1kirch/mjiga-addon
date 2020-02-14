@@ -40,8 +40,9 @@ export class JiraService implements IJiraService {
   }
 
   private currentConfig: any;
+  private kanbans: any[];
   initialize(config: any) {
-    this.currentConfig = config;
+    this.kanbans.push(config);
     //this.kanbanSrv.push(config);
   }
 
@@ -91,26 +92,28 @@ export class JiraService implements IJiraService {
   getCardUpdateInfoForIssue(
     issueId: string,
     toStatus: string,
-  ): { boardId: string; widgetId: string; cardJson: any } {
-    //const kanbans = (await this.kanbanSrv.getAll()) as Kanban[];
-    // kanbans.forEach(kb => {
-    //   const kbJson = JSON.parse(kb.json);
-    // });
-    const statusMap = this.currentConfig.metadata['3074457345621789607']
-      .statusIdToKanbanColumnIdMap[toStatus];
-    const newColumnId = statusMap.columnId;
-    const newSubColumnId = statusMap.subColumnId;
-    return {
-      boardId: 'o9J_k1IGnzo=',
-      widgetId: this.currentConfig.items.find(
-        item => item.jiraIssueId == issueId,
-      ).widgetId,
-      cardJson: {
-        kanbanNode: {
-          column: newColumnId,
-          subColumn: newSubColumnId,
+  ): { boardId: string; widgetId: string; cardJson: any }[] {
+    const result = [];
+    this.kanbans.forEach(kb => {
+      const statusMap = kb.metadata['3074457345621789607']
+        .statusIdToKanbanColumnIdMap[toStatus];
+      const newColumnId = statusMap.columnId;
+      const newSubColumnId = statusMap.subColumnId;
+
+      result.push({
+        boardId: 'o9J_k1IGnzo=',
+        widgetId: this.currentConfig.items.find(
+          item => item.jiraIssueId == issueId,
+        ).widgetId,
+        cardJson: {
+          kanbanNode: {
+            column: newColumnId,
+            subColumn: newSubColumnId,
+          },
         },
-      },
-    };
+      })
+    });
+
+    return result;
   }
 }
