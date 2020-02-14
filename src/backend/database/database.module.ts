@@ -3,8 +3,9 @@ import { TypeOrmConfigService } from './services/typeormconfig.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JiraModule } from '../jira/jira.module';
 import { IssueLinkService } from './services/issue-link.service';
+import { KanbanService } from './services/kanban.service';
 
-const providers = [TypeOrmConfigService, IssueLinkService];
+const providers = [TypeOrmConfigService, IssueLinkService, KanbanService];
 
 @Global()
 @Module({

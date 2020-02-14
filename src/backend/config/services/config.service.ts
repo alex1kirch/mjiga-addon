@@ -45,6 +45,18 @@ export class ConfigService {
     return this.parsedConfig[this.env].miro;
   }
 
+  get jiraInfo(): { accessToken: string,
+    accessTokenSecret: string,
+    consumerKey: string,
+    consumerSecret: string,
+    jiraApiUrl: string,
+    requestTokenPath: string,
+    accessTokenPath: string,
+    authorizePath: string,
+    host: string } {
+    return this.parsedConfig[this.env].jira;
+  }
+
   getField<T = any>(fieldName): T | null {
     const field = this.parsedConfig[this.env][fieldName];
     return JSON.parse(

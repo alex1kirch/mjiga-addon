@@ -14,28 +14,26 @@ export class JiraWebhookController {
   ) {}
 
   @Post('webhook')
-  async jiraBoardUpdated(@Body() payload: any) {
+  async jiraBoardUpdated(@Body() payload: any, @Res() res: Response) {
+    res.status(200).send();
     console.log(payload.webhookEvent);
-    // if (payload.webhookEvent === 'jira:issue_updated') {
-    //   const changelogItem = payload.changelog.items.find(item => item.field === 'status');
-    //   console.log(changelogItem);
-    //   if (changelogItem) {
-    //     const updateInfo = this.jiraSrv.getCardUpdateInfoForIssue(
-    //       payload.issue.id,
-    //       changelogItem.to,
-    //     );
-    //
-    //     const res = await this.miroRestSrv.updateCard(
-    //       this.configSrv.miroAppInfo.accessToken,
-    //       updateInfo.boardId,
-    //       updateInfo.widgetId,
-    //       updateInfo.cardJson,
-    //     );
-    //     return "";
-    //   }
-    // }
-    //
-    // return '';
+    if (payload.webhookEvent === 'jira:issue_updated') {
+      const changelogItem = payload.changelog.items.find(item => item.field === 'status');
+      console.log(changelogItem);
+      if (changelogItem) {
+        const updateInfo = this.jiraSrv.getCardUpdateInfoForIssue(
+          payload.issue.id,
+          changelogItem.to,
+        );
+
+        await this.miroRestSrv.updateCard(
+          this.configSrv.miroAppInfo.accessToken,
+          updateInfo.boardId,
+          updateInfo.widgetId,
+          updateInfo.cardJson,
+        );
+      }
+    }
   }
 
   @Get('image')
