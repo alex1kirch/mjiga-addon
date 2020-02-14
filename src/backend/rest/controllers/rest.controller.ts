@@ -42,39 +42,56 @@ export class RestController {
 
     this.jiraService.initialize(config);
 
-    //RestController.syncMiroToJira(this)
+    RestController.syncMiroToJira(this)
 
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,HEAD');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Accept');
     res.status(200).send();
+
     setInterval(() => RestController.syncMiroToJira(this), 1000);
   }
 
   private static async syncMiroToJira(context: RestController) {
-    const boardId: string = 'o9J_k1IGnzo=';
-    const token: string = 'f672f733-b74c-4d77-9124-9ce187cd5480';
-    const headers = {
-      authorization: 'Bearer ' + token,
-    };
-    const observer = await context.httpService.get(
-      'http://10.10.0.152:9114/v1/boards/' + boardId + '/widgets/',
-      { headers: headers },
-    );
-    const result = await observer.toPromise();
+    try {
+      const boardId: string = 'o9J_k1IGnzo=';
+      const token: string = 'f672f733-b74c-4d77-9124-9ce187cd5480';
+      const headers = {
+        authorization: 'Bearer ' + token,
+      };
+      const observer = await context.httpService.get(
+        'http://10.10.0.181:9114/v1/boards/' + boardId + '/widgets/',
+        { headers: headers },
+      );
+      const result = await observer.toPromise();
 
-    const cardWidgets = result.data.data.filter(x => x.type === 'card');
-    const parsedMiroCardWidgets = cardWidgets
-      .map(x => RestController.parseMiroCardWidget(x))
-      .filter(x => x.widgetId);
+      const cardWidgets = result.data.data.filter(x => x.type === 'card');
+      const parsedMiroCardWidgets = cardWidgets
+        .map(x => RestController.parseMiroCardWidget(x))
+        .filter(x => x.widgetId);
 
-    const differenceWidgets = RestController.getDifferences(
-      context,
-      parsedMiroCardWidgets,
-      context.currentWidgets,
-    );
+      const differenceWidgets = RestController.getDifferences(
+        context,
+        parsedMiroCardWidgets,
+        context.currentWidgets,
+      );
 
-    await context.processDifferences(differenceWidgets);
+      await context.processDifferences(differenceWidgets);
+
+      differenceWidgets.forEach(diff => {
+        const index = context.currentWidgets.findIndex(x => x.widgetId === diff.widgetId);
+        if (index >= 0){
+          const item = context.currentWidgets[index];
+          item.subColumnId = diff.subColumnId
+          item.columnId = diff.columnId;
+          item.summary = diff.summary;
+          item.description = diff.description;
+        }
+      })
+    }
+    catch (e) {
+      console.log(e)
+    }
   }
 
   private async processDifferences(
@@ -108,7 +125,9 @@ export class RestController {
 
       const oldItem = oldWidgets[oldIndex];
       const difference = RestController.compare(oldItem, newItem);
-      differWidgets.push(difference);
+      if (difference) {
+        differWidgets.push(difference);
+      }
     });
 
     return differWidgets;
@@ -137,7 +156,7 @@ export class RestController {
       columnId: widgetData.columnId,
       subColumnId: widgetData.subColumnId,
       summary: widgetData.summary,
-      widgetId: widgetData.summary,
+      widgetId: widgetData.widgetId,
       description: widgetData.description,
     };
     return jiraCard;
@@ -148,11 +167,11 @@ export class RestController {
       return {widgetId: undefined}!
     }
     const result: IWidgetData = {
-      columnId: json.kanbanNode.column,
-      description: json.description,
-      subColumnId: json.kanbanNode.subColumn,
-      summary: json.title,
-      widgetId: json.id,
+      columnId: RestController.format(json.kanbanNode.column),
+      description: RestController.format(json.description),
+      subColumnId: RestController.format(json.kanbanNode.subColumn),
+      summary: RestController.format(json.title),
+      widgetId: RestController.format(json.id),
     };
     return result;
   }
@@ -161,13 +180,17 @@ export class RestController {
     var items = json['items'];
     return items.map(x => {
       const data: IWidgetData = {
-        description: x.description,
-        summary: x.summary,
-        widgetId: x.widgetId,
-        columnId: x.columnId,
-        subColumnId: x.subColumnId,
+        description: RestController.format(x.description),
+        summary: RestController.format(x.summary),
+        widgetId: RestController.format(x.widgetId),
+        columnId: RestController.format(x.columnId),
+        subColumnId: RestController.format(x.subColumnId),
       };
       return data;
     });
+  }
+
+  private static format(value: string) : string {
+    return value ? value : ""
   }
 }

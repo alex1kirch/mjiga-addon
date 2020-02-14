@@ -26,7 +26,9 @@ export class JiraService implements IJiraService {
     this.kanbanSrv.push(config)
   }
 
-  update(item: IJiraCardData) {}
+  update(item: IJiraCardData) {
+    console.log("update")
+  }
 
   async getCardUpdateInfoForIssue(
     issueId: string,
@@ -42,7 +44,7 @@ export class JiraService implements IJiraService {
     const newSubColumnId = statusMap.subColumnId;
     return {
       boardId: 'o9J_k1IGnzo=',
-      widgetId: this.currentConfig.items.find(item => item.jiraIssueId === issueId).widgetId,
+      widgetId: this.currentConfig.items.find(item => item.jiraIssueId == issueId).widgetId,
       cardJson: {
         kanbanNode: {
           column: newColumnId,
