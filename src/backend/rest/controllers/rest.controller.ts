@@ -13,6 +13,7 @@ import { IJiraCardData, JiraService } from '../../jira/services/jiraService';
 const DefaultMiroBoardID = 'o9J_k1IGnzo=';
 const TOKEN = 'f672f733-b74c-4d77-9124-9ce187cd5480';
 const MiroServerHost = "http://10.10.0.181:9114"
+const SyncPeriod = 3000
 
 interface IWidgetData {
   widgetId: string;
@@ -114,7 +115,7 @@ class KanbanSynchronizer {
     this.started = true;
     this.onDestroyedFunc = onDestroyed;
     this.jiraService.initialize(config);
-    this.syncHandler = setInterval(() => KanbanSynchronizer.syncMiroToJira(this), 1000);
+    this.syncHandler = setInterval(() => KanbanSynchronizer.syncMiroToJira(this), SyncPeriod);
   }
 
   public destroy(): void {
