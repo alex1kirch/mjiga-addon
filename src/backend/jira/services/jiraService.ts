@@ -32,7 +32,8 @@ export class JiraService implements IJiraService {
       jira.host + jira.requestTokenPath,
       jira.host + jira.accessTokenPath,
       jira.consumerKey,
-      jira.consumerSecret,
+      // @ts-ignore
+      jira.consumerSecret.toString('ascii'),
       '1.0',
       'https://miro-kanban-plugin.glitch.me/jira/callback',
       'RSA-SHA1',
@@ -52,7 +53,7 @@ export class JiraService implements IJiraService {
     if (kanbanCard) {
 
       const updateUrl = new URL(
-        `issue/${kanbanCard.jiraIssueId}`,
+        `issue/${kanbanCard.jiraIssueId}/transitions?expand=transitions.fields`,
         this.configSrv.jiraInfo.jiraApiUrl,
       );
 
@@ -66,20 +67,24 @@ export class JiraService implements IJiraService {
         }
       }
 
+      const data = {
+        update: {
+          summary: [{set: card.summary}],
+          description: [{set: card.description}],
+        },
+        transition: {
+          id: jiraNewStatus
+        }
+      }
       //@ts-ignore
       this.oauth._performSecureRequest(
         this.configSrv.jiraInfo.accessToken,
         this.configSrv.jiraInfo.accessTokenSecret,
-        'PUT',
+        'POST',
         updateUrl.href,
         null,
-        {
-          update: {
-            summary: {set: card.summary},
-            description: {set: card.description},
-            status: {set: jiraNewStatus}
-          }
-        },
+        JSON.stringify(data)
+        ,
         'application/json',
         (error, data) => {
           console.log(error, data)
