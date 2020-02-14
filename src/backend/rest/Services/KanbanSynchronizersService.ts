@@ -1,10 +1,11 @@
-import { HttpService } from '@nestjs/common';
+import { HttpService, Injectable } from '@nestjs/common';
 import { IJiraCardData, JiraService } from '../../jira/services/jiraService';
 
 const TOKEN = 'f672f733-b74c-4d77-9124-9ce187cd5480';
 const MiroServerHost = 'http://10.10.0.181:9114';
 const SyncPeriod = 3000;
 
+@Injectable()
 export class KanbanSynchronizersService {
   private synchronizers: KanbanSynchronizer[] = [];
 
@@ -20,7 +21,7 @@ export class KanbanSynchronizersService {
       this.httpService,
       this.jiraService,
     );
-    newSynchronizer.start(config, (sender: KanbanSynchronizer) => {
+    newSynchronizer.start(config.rawData, (sender: KanbanSynchronizer) => {
       const index = this.synchronizers.indexOf(sender);
       if (index >= 0){
         this.synchronizers.splice(index, 1)
@@ -59,6 +60,7 @@ export interface SynchronizerConfig {
   miroBoardId: string;
   jiraBoardId: string;
   initialWidgets: IWidgetData[];
+  rawData: any
 }
 
 

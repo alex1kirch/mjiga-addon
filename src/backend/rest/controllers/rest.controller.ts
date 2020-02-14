@@ -26,6 +26,7 @@ export class RestController {
       jiraBoardId: jiraBoardID,
       initialWidgets: inputWidgets,
       miroBoardId: boardId,
+      rawData: config
     };
 
     this.syncService.addKanbanBoard(syncConfig);

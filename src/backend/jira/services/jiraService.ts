@@ -40,17 +40,21 @@ export class JiraService implements IJiraService {
     );
   }
 
-  private currentConfig: any;
-  private kanbans: any[];
+  private kanbans: any[] = [];
   initialize(config: any) {
     this.kanbans.push(config);
     //this.kanbanSrv.push(config);
   }
 
   update(card: IJiraCardData) {
-    const kanbanCard = this.currentConfig.items.find(
-      i => (i.widgetId = card.widgetId),
-    );
+    let kanbanCard = null;
+    let kanban = null;
+    this.kanbans.forEach(kb => {
+      if (!kanbanCard) {
+        kanbanCard = kb.items.find(i => i.widgetId === card.widgetId)
+        kanban = kb;
+      }
+    });
     if (kanbanCard) {
 
       const updateUrl = new URL(
@@ -60,8 +64,8 @@ export class JiraService implements IJiraService {
 
       console.log(updateUrl.href);
       let jiraNewStatus = '';
-      for (let status in this.currentConfig.metadata["3074457345621789607"].statusIdToKanbanColumnIdMap) {
-        const hz = this.currentConfig.metadata["3074457345621789607"].statusIdToKanbanColumnIdMap[status];
+      for (let status in kanban.metadata["3074457345621789607"].statusIdToKanbanColumnIdMap) {
+        const hz = kanban.metadata["3074457345621789607"].statusIdToKanbanColumnIdMap[status];
         if (hz.columnId == card.columnId) {
           jiraNewStatus = status;
           break;
@@ -70,8 +74,8 @@ export class JiraService implements IJiraService {
 
       const data = {
         update: {
-          summary: [{set: card.summary}],
-          description: [{set: card.description}],
+          Summary: [{set: card.summary}],
+          Description: [{set: card.description}],
         },
         transition: {
           id: jiraNewStatus
@@ -107,7 +111,7 @@ export class JiraService implements IJiraService {
 
       result.push({
         boardId: 'o9J_k1IGnzo=',
-        widgetId: this.currentConfig.items.find(
+        widgetId: kb.items.find(
           item => item.jiraIssueId == issueId,
         ).widgetId,
         cardJson: {
