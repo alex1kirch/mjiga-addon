@@ -16,25 +16,26 @@ export class JiraWebhookController {
   @Post('webhook')
   async jiraBoardUpdated(@Body() payload: any) {
     console.log(payload.webhookEvent);
-    if (payload.webhookEvent === 'jira:issue_updated') {
-      const changelogItem = payload.changelog.items.find(item => item.field === 'status');
-      console.log(changelogItem);
-      if (changelogItem) {
-        const updateInfo = this.jiraSrv.getCardUpdateInfoForIssue(
-          payload.issue.id,
-          changelogItem.to,
-        );
-
-        await this.miroRestSrv.updateCard(
-          this.configSrv.miroAppInfo.accessToken,
-          updateInfo.boardId,
-          updateInfo.widgetId,
-          updateInfo.cardJson,
-        );
-      }
-    }
-
-    return '';
+    // if (payload.webhookEvent === 'jira:issue_updated') {
+    //   const changelogItem = payload.changelog.items.find(item => item.field === 'status');
+    //   console.log(changelogItem);
+    //   if (changelogItem) {
+    //     const updateInfo = this.jiraSrv.getCardUpdateInfoForIssue(
+    //       payload.issue.id,
+    //       changelogItem.to,
+    //     );
+    //
+    //     const res = await this.miroRestSrv.updateCard(
+    //       this.configSrv.miroAppInfo.accessToken,
+    //       updateInfo.boardId,
+    //       updateInfo.widgetId,
+    //       updateInfo.cardJson,
+    //     );
+    //     return "";
+    //   }
+    // }
+    //
+    // return '';
   }
 
   @Get('image')
